@@ -199,7 +199,7 @@ var moves = {
 };
 
 // Set our hero's strategy
-var move = moves.unwiseAssassin;
+var move = moves.superHero;
 
 // Export the move function here
 module.exports = move;
