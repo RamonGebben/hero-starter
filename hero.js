@@ -119,6 +119,25 @@ var moves = {
         }
     },
 
+    superHero: function (gameData, helpers) {
+        const myHero = gameData.activeHero;
+        const mine = helpers.findNearestUnownedDiamondMine(gameData);
+        const weakEnemy = helpers.findNearestEnemy(gameData);
+
+        let direction = 'UnChanged';
+
+        if (myHero.health <= 40) direction = helpers.findNearestHealthWell(gameData);
+        if (weakEnemy) direction = weakEnemy;
+        if (mine) direction = mine;
+
+        if (direction === 'UnChanged') direction = moves.carefulAssassin(gameData, helpers);
+
+        if (direction === this.previousDirection) direction = moves.blindMan(gameData, helpers);
+        this.previousDirection = direction;
+
+        return direction;
+    },
+
     // The "Safe Diamond Miner"
     // This hero will attempt to capture enemy diamond mines.
     safeDiamondMiner: function (gameData, helpers) {
@@ -180,7 +199,7 @@ var moves = {
 };
 
 // Set our hero's strategy
-var move = moves.carefulAssassin;
+var move = moves.unwiseAssassin;
 
 // Export the move function here
 module.exports = move;
