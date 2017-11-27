@@ -138,6 +138,39 @@ var moves = {
         return direction;
     },
 
+    massimo: function (gameData, helpers) {
+        let massimo = gameData.activeHero;
+        let alex = helpers.getNearestEnemy(gameData);
+        let mine = helpers.getNearestNonTeamDiamondMine(gameData);
+        let healthWell = helpers.getNearestHealthWell(gameData);
+        let teamMember = helpers.getNearestTeamMember(gameData);
+        let mineCloserThanAlex = (mine.isReachable() && mine.getDistance() <= alex.getDistance());
+
+        if (massimo.health > 30 && alex.canBeKilledNow()) {
+            return alex.getDirection();
+        }
+
+        if (teamMember.canBeHealedNow()) {
+            return teamMember.getDirection();
+        }
+
+        if (massimo.health <= 80 && healthWell.getDistance() === 1) {
+            return healthWell.getDirection();
+        } else if (massimo.health <= 55 && healthWell.isReachable()) {
+            return healthWell.getDirection();
+        } else if (!alex.isReachable() || mineCloserThanAlex) {
+            return mine.getDirection();
+        }
+
+        // Nearby diamond mines are secure, so go on the offensive.
+        let weakerEnemy = helpers.getNearestWeakerEnemy(gameData);
+        if (weakerEnemy.getDistance() <= alex.getDistance()) {
+            return weakerEnemy.getDirection();
+        } else if (alex) {
+            return alex.getDirection();
+        }
+    },
+
     // The "Safe Diamond Miner"
     // This hero will attempt to capture enemy diamond mines.
     safeDiamondMiner: function (gameData, helpers) {
@@ -199,7 +232,7 @@ var moves = {
 };
 
 // Set our hero's strategy
-var move = moves.superHero;
+var move = moves.massimo;
 
 // Export the move function here
 module.exports = move;

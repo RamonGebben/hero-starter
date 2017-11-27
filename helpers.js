@@ -246,4 +246,73 @@ helpers.findNearestTeamMember = function (gameData) {
     return pathInfoObject.direction;
 };
 
+
+helpers.getNearestNonTeamDiamondMine = function (gameData, startTile) {
+    startTile = (startTile || gameData.activeHero);
+
+    return helpers.nearestTileFilter(gameData, function (tile) {
+        return (tile.type === 'DiamondMine' && !tile.owner || tile.owner.team !== startTile.team);
+    });
+};
+
+helpers.getNearestHealthWell = function (gameData) {
+    return helpers.nearestTileFilter(gameData, function (tile) {
+        return (tile.type === 'HealthWell');
+    });
+};
+
+helpers.getNearestTeamMember = function (gameData, startTile) {
+    startTile = (startTile || gameData.activeHero);
+
+    return helpers.nearestTileFilter(gameData, function (tile) {
+        return (tile.type === 'Hero' && tile.team === startTile.team);
+    });
+};
+
+helpers.nearestTileFilter = function (gameData, filterFn) {
+    var hero = gameData.activeHero,
+        board = gameData.board,
+        result,
+        tileObj;
+
+    result = helpers.findNearestObjectDirectionAndDistance(board, hero, filterFn);
+
+    tileObj = (result || {});
+
+    return {
+        isReachable: function () {
+            return !!result;
+        },
+        getDistance: function () {
+            return tileObj.distance;
+        },
+        getDirection: function () {
+            return tileObj.direction;
+        },
+        canBeKilledNow: function () {
+            return (result && tileObj.health <= 30 && tileObj.distance === 1);
+        },
+        canBeHealedNow: function () {
+            return (result && tileObj.health <= 60 && tileObj.distance === 1);
+        }
+    };
+};
+
+helpers.getNearestWeakerEnemy = function (gameData, startTile) {
+    startTile = (startTile || gameData.activeHero);
+
+    return helpers.nearestTileFilter(gameData, function (tile) {
+        return (tile.type === 'Hero' && tile.team !== startTile.team && tile.health < startTile.health);
+    });
+};
+
+helpers.getNearestEnemy = function (gameData, startTile) {
+    startTile = (startTile || gameData.activeHero);
+
+    return helpers.nearestTileFilter(gameData, function (tile) {
+        return (tile.type === 'Hero' && tile.team !== startTile.team);
+    });
+};
+
+
 module.exports = helpers;
